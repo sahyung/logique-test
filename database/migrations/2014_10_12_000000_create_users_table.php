@@ -18,6 +18,8 @@ class CreateUsersTable extends Migration
             $table->primary('id');
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
+            $table->date('dob')->nullable();
+            $table->boolean('gender')->default(0)->comment('0 => Female, 1 => Male');
             $table->string('email')->unique();
             $table->enum('role',['user','admin','superadmin'])->default('user');
             $table->timestamp('email_verified_at')->nullable();
