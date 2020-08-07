@@ -4,16 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Mail\ForgotPass;
 use App\Models\User;
+use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Uuid;
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc', 'gender', 'dob']);
+        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc', 'gender', 'dob', 'addresses']);
         $v = Validator::make($request->all(), [
             'last_name' => 'required|alpha_spaces|min:3',
             'email' => 'required|email|unique:users',
@@ -21,6 +23,7 @@ class AuthController extends Controller
             'tnc'  => 'required|accepted',
             'gender'  => 'required|boolean',
             'dob'  => 'date_format:Y-m-d',
+            'addresses.*' => 'string|check_address',
         ]);
         if ($v->fails())
         {
@@ -30,9 +33,16 @@ class AuthController extends Controller
             ], 422);
         }
         $user = new User($data);
+        $user->id = Uuid::generate(4)->string;
         $user->password = bcrypt($user->password);
         $user->password = bcrypt($request->password);
         $user->save();
+
+        foreach($request->addresses as $address) {
+            $adr = new UserAddress(['address' => $address]);
+            $adr->user_id = $user->id;
+            $adr->save();
+        }
         return response()->json(['status' => 'success'], 200);
     }
     public function login(Request $request)

@@ -29,5 +29,9 @@ class AppServiceProvider extends ServiceProvider
             // If you want to accept hyphens use: /^[\pL\s-]+$/u.
             return preg_match('/^[\pL\s]+$/u', $value); 
         });
+
+        Validator::extend('check_address', function ($attribute, $value) {
+            return preg_match('/^(?:\\d+ [a-zA-Z ]+, ){2}[a-zA-Z ]+$/', $value);
+        });
     }
 }
