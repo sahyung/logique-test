@@ -13,12 +13,12 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role']);
-        return $data;
+        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc']);
         $v = Validator::make($request->all(), [
-            'last_name' => 'required|last_name',
+            'last_name' => 'required|alpha_spaces|min:3',
             'email' => 'required|email|unique:users',
             'password'  => 'required|min:3|confirmed',
+            'tnc'  => 'required|accepted',
         ]);
         if ($v->fails())
         {
