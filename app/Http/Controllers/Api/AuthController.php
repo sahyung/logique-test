@@ -15,8 +15,8 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc', 'gender', 'dob', 'addresses']);
-        $v = Validator::make($request->all(), [
+        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc', 'gender', 'dob', 'addresses', 'cc']);
+        $v = Validator::make($data, [
             'last_name' => 'required|alpha_spaces|min:3',
             'email' => 'required|email|unique:users',
             'password'  => 'required|min:3|confirmed',
@@ -24,6 +24,9 @@ class AuthController extends Controller
             'gender'  => 'required|boolean',
             'dob'  => 'date_format:Y-m-d',
             'addresses.*' => 'string|check_address',
+            'cc.type' => 'required|in:Visa,Master',
+            'cc.number' => 'required|cc_number',
+            'cc.expiry' => 'required|date_format:m-y|after:today|cc_expiry',
         ]);
         if ($v->fails())
         {

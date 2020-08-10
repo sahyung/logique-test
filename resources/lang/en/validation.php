@@ -31,6 +31,8 @@ return [
         'array' => 'The :attribute must have between :min and :max items.',
     ],
     'boolean' => 'The :attribute field must be true or false.',
+    'cc_expiry' => 'The :attribute is not a valid card number',
+    'cc_number' => 'The :attribute is not a valid card number',
     'check_address' => 'The :attribute must be in format \'#, Street name, Zip Code, City, Country\'',
     'confirmed' => 'The :attribute confirmation does not match.',
     'date' => 'The :attribute is not a valid date.',
