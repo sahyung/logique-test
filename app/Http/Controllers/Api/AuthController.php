@@ -6,6 +6,7 @@ use App\Mail\ForgotPass;
 use App\Models\User;
 use App\Models\UserAddress;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -15,7 +16,7 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc', 'gender', 'dob', 'addresses', 'cc']);
+        $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc', 'gender', 'dob', 'addresses', 'cc', 'membership']);
         $v = Validator::make($data, [
             'last_name' => 'required|alpha_spaces|min:3',
             'email' => 'required|email|unique:users',
@@ -27,6 +28,7 @@ class AuthController extends Controller
             'cc.type' => 'required|in:Visa,Master',
             'cc.number' => 'required|cc_number',
             'cc.expiry' => 'required|date_format:m-y|after:today|cc_expiry',
+            'membership' => 'required|in:Silver,Gold,Platinum,Black,VIP,VVIP',
         ]);
         if ($v->fails())
         {
@@ -35,6 +37,42 @@ class AuthController extends Controller
                 'errors' => $v->errors()
             ], 422);
         }
+        $dt = Carbon::now();
+        $dob = Carbon::createFromFormat('Y-m-d', $data['dob']);
+        switch ($data['membership']) {
+            case 'Silver':
+                $data['fee'] = '100000';
+                if (!$data['gender']) {
+                    if ($dt->diffInYears($dob) >= 17) $data['vat'] = 0;
+                }
+                break;
+            case 'Gold':
+                $data['fee'] = '200000';
+                if (!$data['gender']) {
+                    if ($dt->diffInYears($dob) >= 20) $data['vat'] = 0;
+                }
+                break;
+            case 'Platinum':
+                $data['fee'] = '300000';
+                if (!$data['gender']) {
+                    if ($dt->diffInYears($dob) >= 22) $data['vat'] = 0;
+                }
+                break;
+            case 'Black':
+                $data['fee'] = '500000';
+                break;
+            case 'VIP':
+                $data['fee'] = '1000000';
+                break;
+            case 'VVIP':
+                $data['fee'] = '2000000';
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        // return $data;
         $user = new User($data);
         $user->id = Uuid::generate(4)->string;
         $user->password = bcrypt($user->password);
