@@ -19,6 +19,7 @@ class CreateUserAddressesTable extends Migration
             $table->string('user_id');
             $table->foreign('user_id')->references('id')->on('users');
             $table->string('address')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

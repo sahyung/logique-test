@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\UuidsTrait;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use Notifiable, UuidsTrait;
+    use SoftDeletes, Notifiable, UuidsTrait;
 
     /**
      * The attributes that are mass assignable.
