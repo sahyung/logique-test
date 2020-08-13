@@ -23,3 +23,17 @@ Content-Type: application/json
 | ----------- | ----- | ---- | ---
 | POST  | api/auth/register | `{"email": "user@example.com", "password": "123456", "password_confirmation": "123456", "dob": "2020-12-24","gender": 0,"tnc": 1,"first_name": "Tarjono","last_name": "Tarjono","addresses": ["15 Gordon St, 3121 Cremorne, Australia"],"cc": {"type": "Visa","number": "4012888888881881","expiry": "02-21"},"membership": "Gold"}`
 | POST  | api/auth/login | `{"email": "user@example.com", "password": "123456"}` | check `Authorization` on response's headers
+
+## Example Registration
+
+| field | value
+| ----- | ---
+| first_name | Tarjono
+| last_name | Tarjono
+| email | user@example.com
+| password | 123456
+| password_confirmation | 123456
+| dob | 2020-12-24
+| addresses | 15 Gordon St, 3121 Cremorne, Australia
+| cc number | 4012888888881881
+| expiry | 02-21
