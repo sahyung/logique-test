@@ -4,12 +4,13 @@ Test for PHP Developer Position
 ## Quickstart
 
 Make sure to configure database on `.env`
-```
+```sh
 $ git clone
 $ cp .env.example .env
 $ composer install
 $ php artisan migrate --seed
-$ php artisan serve
+$ php artisan serve --port=8000 --host=127.0.0.1
+# open browser http://127.0.0.1:8000
 ```
 
 ## Endpoints
