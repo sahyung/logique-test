@@ -6,7 +6,7 @@ use App\Mail\ForgotPass;
 use App\Models\User;
 use App\Models\UserAddress;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -14,6 +14,28 @@ use Illuminate\Support\Facades\Validator;
 use Uuid;
 class AuthController extends Controller
 {
+    public function registerWeb(Request $request)
+    {
+        $request->merge([
+            'gender' => 1,
+            'cc' => [
+                'type' => isset($request->cc_type) ? $request->cc_type : null,
+                'number' => isset($request->cc_number) ? $request->cc_number : null,
+                'expiry' => isset($request->cc_expiry) ? str_replace('/','-', $request->cc_expiry) : null,
+            ],
+        ]);
+
+        $response = $this->register($request);
+        $statusCode = $response->status();
+        $body = $response->getData();
+        if($statusCode === 200) {
+            return redirect()->back()->withErrors([
+                "success_message" => "Registration Success",
+            ]);
+        }
+        return redirect()->back()->withErrors($body->errors);
+    }
+
     public function register(Request $request)
     {
         $data = $request->only(['first_name', 'last_name', 'email', 'password', 'password_confirmation', 'role', 'tnc', 'gender', 'dob', 'addresses', 'cc', 'membership']);
@@ -38,39 +60,42 @@ class AuthController extends Controller
             ], 422);
         }
         $dt = Carbon::now();
-        $dob = Carbon::createFromFormat('Y-m-d', $data['dob']);
-        switch ($data['membership']) {
-            case 'Silver':
-                $data['fee'] = '100000';
-                if (!$data['gender']) {
-                    if ($dt->diffInYears($dob) >= 17) $data['vat'] = 0;
-                }
-                break;
-            case 'Gold':
-                $data['fee'] = '200000';
-                if (!$data['gender']) {
-                    if ($dt->diffInYears($dob) >= 20) $data['vat'] = 0;
-                }
-                break;
-            case 'Platinum':
-                $data['fee'] = '300000';
-                if (!$data['gender']) {
-                    if ($dt->diffInYears($dob) >= 22) $data['vat'] = 0;
-                }
-                break;
-            case 'Black':
-                $data['fee'] = '500000';
-                break;
-            case 'VIP':
-                $data['fee'] = '1000000';
-                break;
-            case 'VVIP':
-                $data['fee'] = '2000000';
-                break;
-            
-            default:
-                # code...
-                break;
+        // dd([$data['dob'], Carbon::createFromFormat('Y-m-d', $data['dob'])]);
+        $dob = isset($data['dob']) ? Carbon::createFromFormat('Y-m-d', $data['dob']) : $dt;
+        if (isset($data['membership'])){
+            switch ($data['membership']) {
+                case 'Silver':
+                    $data['fee'] = '100000';
+                    if (!$data['gender']) {
+                        if ($dt->diffInYears($dob) >= 17) $data['vat'] = 0;
+                    }
+                    break;
+                case 'Gold':
+                    $data['fee'] = '200000';
+                    if (!$data['gender']) {
+                        if ($dt->diffInYears($dob) >= 20) $data['vat'] = 0;
+                    }
+                    break;
+                case 'Platinum':
+                    $data['fee'] = '300000';
+                    if (!$data['gender']) {
+                        if ($dt->diffInYears($dob) >= 22) $data['vat'] = 0;
+                    }
+                    break;
+                case 'Black':
+                    $data['fee'] = '500000';
+                    break;
+                case 'VIP':
+                    $data['fee'] = '1000000';
+                    break;
+                case 'VVIP':
+                    $data['fee'] = '2000000';
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
         }
         // return $data;
         $user = new User($data);
@@ -78,14 +103,31 @@ class AuthController extends Controller
         $user->password = bcrypt($user->password);
         $user->password = bcrypt($request->password);
         $user->save();
-
-        foreach($request->addresses as $address) {
-            $adr = new UserAddress(['address' => $address]);
-            $adr->user_id = $user->id;
-            $adr->save();
+        if (isset($data['address'])) {
+            foreach($request->addresses as $address) {
+                $adr = new UserAddress(['address' => $address]);
+                $adr->user_id = $user->id;
+                $adr->save();
+            }
         }
         return response()->json(['status' => 'success'], 200);
     }
+
+
+    public function loginWeb(Request $request)
+    {
+        $response = $this->login($request);
+        $statusCode = $response->status();
+        $body = $response->getData();
+        if ($statusCode === 200) {
+            session([
+                'bearer' => $response->headers->get('authorization')
+            ]);
+            return redirect()->route('home');
+        }
+        return redirect()->back()->withErrors($body->errors);
+    }
+    
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -93,7 +135,10 @@ class AuthController extends Controller
             // return $this->respondWithToken($token);
             return response()->json(['status' => 'success'], 200)->header('Authorization', $token);
         }
-        return response()->json(['error' => 'login_error'], 401);
+        return response()->json([
+            'status' => 'error',
+            'errors' => ['message' => 'Unauthorized']
+        ], 401);
     }
 
     public function logout()
@@ -105,7 +150,7 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function user(Request $request)
+    public static function user(Request $request)
     {
         $user = User::find(Auth::user()->id);
         return response()->json([
