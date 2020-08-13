@@ -62,6 +62,18 @@
                             </div>
                         </div>
 
+                        @if(sizeof($user['addresses']) > 0)
+                        <div class="form-group{{ $errors->has('addresses') ? ' has-error' : '' }}">
+                            <label class="col-md-4 control-label">Addresses</label>
+
+                            <div class="col-md-6">
+                                @foreach($user['addresses'] as $v)
+                                <input type="text" class="form-control" value="{{ $v }}">
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
                     </form>
                 </div>
             </div>

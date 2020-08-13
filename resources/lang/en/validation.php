@@ -33,7 +33,7 @@ return [
     'boolean' => 'The :attribute field must be true or false.',
     'cc_expiry' => 'The :attribute is not a valid card number',
     'cc_number' => 'The :attribute is not a valid card number',
-    'check_address' => 'The :attribute must be in format \'#, Street name, Zip Code, City, Country\'',
+    'check_address' => 'The :attribute must be in format \'#Street name, #Zip_Code #City, #Country\'',
     'confirmed' => 'The :attribute confirmation does not match.',
     'date' => 'The :attribute is not a valid date.',
     'date_equals' => 'The :attribute must be a date equal to :date.',

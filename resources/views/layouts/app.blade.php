@@ -44,7 +44,7 @@
 
                 <!-- Branding Image -->
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    Task List
+                    Logique
                 </a>
             </div>
 
@@ -91,6 +91,16 @@
             });
 
             $("#membership").selectmenu();
+
+            var i = 1;
+            $('#add').click(function() {
+                i++;
+                $('#dynamic_field').append('<tr id="row' + i + '" class="dynamic-added"><td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">X</button></td><td><input type="text" name="addresses[]" placeholder="#Street name, #Zip_Code #City, #Country" class="form-control" style="width: 180%" /></td></tr>');
+            });
+            $(document).on('click', '.btn_remove', function() {
+                var button_id = $(this).attr("id");
+                $('#row' + button_id + '').remove();
+            });
         });
     </script>
     {{-- <script src="{{ elixir('js/app.js') }}"></script> --}}

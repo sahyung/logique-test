@@ -33,7 +33,16 @@ class AuthController extends Controller
                 "success_message" => "Registration Success",
             ]);
         }
-        return redirect()->back()->withErrors($body->errors);
+        $errors = json_decode(json_encode($body->errors), true);;
+        foreach($body->errors as $key => $v) {
+            if (stripos($key, 'addresses') === 0) {
+                $arr = explode(' ', $v[0]);
+                $arr[1] = 'Addresses';
+                $v[0] = implode(' ', $arr);
+                $errors['addresses'] = $v;
+            }
+        }
+        return redirect()->back()->withErrors($errors);
     }
 
     public function register(Request $request)
@@ -103,7 +112,7 @@ class AuthController extends Controller
         $user->password = bcrypt($user->password);
         $user->password = bcrypt($request->password);
         $user->save();
-        if (isset($data['address'])) {
+        if (isset($data['addresses'])) {
             foreach($request->addresses as $address) {
                 $adr = new UserAddress(['address' => $address]);
                 $adr->user_id = $user->id;
@@ -165,7 +174,13 @@ class AuthController extends Controller
 
     public static function user(Request $request)
     {
-        $user = User::find(Auth::user()->id);
+        $user = User::find(Auth::user()->id)->toArray();
+        $addresses = UserAddress::select('address')->where('user_id', $user['id'])->get()->toArray();
+        $user['addresses'] = [];
+        foreach($addresses as $val) {
+            $user['addresses'][] = $val['address'];
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => $user
