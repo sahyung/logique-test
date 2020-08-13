@@ -150,6 +150,19 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function logoutWeb(Request $request)
+    {
+        $token = session()->get('bearer');
+        $request->headers->set('Authorization', "bearer $token");
+        $request->headers->set('Accept', "application/json");
+        $response = $this->logout($request);
+        $statusCode = $response->status();
+        if ($statusCode === 200) {
+            return redirect()->route('login')->withErrors(["success_message" => $response->getData('data')['msg']]);
+        }
+        return redirect()->route('login')->withErrors(['message' => 'Unauthorized']);
+    }
+
     public static function user(Request $request)
     {
         $user = User::find(Auth::user()->id);

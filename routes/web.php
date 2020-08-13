@@ -25,6 +25,6 @@ Route::get('login', function () {
 Route::post('login', 'AuthController@loginWeb')->name('loginWeb');
 
 Route::get('home', 'UserController@showWeb')->name('home');
-
+Route::get('logout', 'AuthController@logoutWeb');
 Route::get('auth/reset', 'AuthController@reset')->name('api.v1.auth.reset');
 Route::post('auth/reset', 'AuthController@reset')->name('api.v1.auth.reset');
